@@ -177,7 +177,7 @@
         <div class="item"><label><input type="checkbox" class="calc-check" data-money="200000000" data-time="30" onchange="calc()"> 경찰서 털이 2차</label><span class="badge">$200,000,000 / 30분</span></div>
         <div class="item"><label><input type="checkbox" class="calc-check" data-money="200000000" data-time="30" onchange="calc()"> 즉흥</label><span class="badge">$200,000,000 / 30분</span></div>
         <div class="item"><label><input type="checkbox" class="calc-check" data-money="200000000" data-time="30" onchange="calc()"> 영장</label><span class="badge">$200,000,000 / 30분</span></div>
-        <div class="item"><label><input type="checkbox" class="calc-check" data-money="300000000" data-time="30" onchange="calc()"> 수배</label><span class="badge">$200,000,000 / 30분</span></div>
+        <div class="item"><label><input type="checkbox" class="calc-check" data-money="200000000" data-time="30" onchange="calc()"> 수배</label><span class="badge">$300,000,000 / 30분</span></div>
       </div>
       <div id="mudeo-panel" style="display: none; margin-top: 20px; padding: 15px; background: var(--input-bg); border-radius: 12px;">
         <div style="font-weight: bold; margin-bottom: 12px; color: var(--accent-blue);">묻더 선택:</div>
@@ -222,7 +222,7 @@
       <div class="result-info">
         <div class="info-box"><span class="info-label">총 벌금</span><span class="info-value money">$<span id="disp-money">0</span></span></div>
         <div class="info-box"><span class="info-label">구금 시간</span><span class="info-value"><span id="disp-time">0</span>분</span></div>
-        <div class="info-box"><span class="info-label">보석금 감면</span><div class="bail-group"><input type="number" id="f-bail-time" value="0" min="0" oninput="calc()"><span style="font-size: 14px; font-weight: 900;">분</span></div></div>
+        <div class="info-box"><span class="info-label">보석금 감면</span><div class="bail-group"><input type="number" id="f-bail-time" value="0" min="0" oninput="onBailInputChange()"><span style="font-size: 14px; font-weight: 900;">분</span></div></div>
       </div>
       <div class="action-btns">
         <button class="mini-btn btn-reset" onclick="resetCalc()">🔄 초기화</button>
@@ -254,6 +254,7 @@
     let selectedNotice = null;
     let selectedMudeo = null;
     let isPeakMode = false;
+    let isManualBailInput = false;
 
     // 묻더 관련 벌금표 데이터
     const mudeoData = {
@@ -293,12 +294,17 @@
       
       if(isApplicable && checkbox.checked) {
         selectedStory = storyType;
+        selectedMudeo = null;
         document.getElementById('mudeo-panel').style.display = 'block';
+        document.querySelectorAll('.mudeo-btn').forEach(btn => btn.classList.remove('mudeo-active'));
       } else {
         selectedStory = null;
+        selectedMudeo = null;
         document.getElementById('mudeo-panel').style.display = 'none';
-        calc();
       }
+      
+      // 기본 값으로 계산
+      calc();
     }
 
     function applyMudeo(mudeoType) {
@@ -438,9 +444,20 @@
 
       let bailInput = parseInt(document.getElementById('f-bail-time').value, 10) || 0;
       
-      // 피크 모드일 때 자동으로 보석금 감면 계산
-      if(isPeakMode && baseTime > 5) {
-        bailInput = baseTime - 5;
+      // 피크 모드일 때 자동으로 보석금 감면 계산 (수동 입력이 아닐 때만)
+      if(isPeakMode && !isManualBailInput) {
+        // ATM 체크 여부 확인
+        const isATMChecked = Array.from(document.querySelectorAll('#tab-story .calc-check:checked')).some(c => 
+          c.parentElement.innerText.includes('ATM')
+        );
+        
+        if(isATMChecked && baseTime >= 10) {
+          // ATM은 0분으로 만들기 위해 전체 시간 감면
+          bailInput = baseTime;
+        } else if(baseTime > 5) {
+          // 다른 경우는 5분까지만 감면
+          bailInput = baseTime - 5;
+        }
         document.getElementById('f-bail-time').value = bailInput;
       }
       
@@ -455,15 +472,31 @@
       }
 
       if (baseTime >= 5) time = Math.max(5, time); else time = Math.max(0, time);
+      
+      // ATM이고 피크모드일 때는 0분 허용
+      if(isPeakMode && Array.from(document.querySelectorAll('#tab-story .calc-check:checked')).some(c => c.parentElement.innerText.includes('ATM'))) {
+        time = Math.max(0, baseTime - bail);
+      }
 
       document.getElementById('disp-money').innerText = money.toLocaleString();
       document.getElementById('disp-time').innerText = time;
     }
 
-    function resetCalc() { document.querySelectorAll('.calc-check').forEach(c => c.checked = false); document.getElementById('f-bail-time').value = 0; calc(); }
+    function onBailInputChange() {
+      isManualBailInput = true;
+      calc();
+    }
+
+    function resetCalc() { 
+      document.querySelectorAll('.calc-check').forEach(c => c.checked = false); 
+      document.getElementById('f-bail-time').value = 0; 
+      isManualBailInput = false;
+      calc(); 
+    }
 
     function togglePeakMode() {
       isPeakMode = !isPeakMode;
+      isManualBailInput = false;
       const btn = document.getElementById('c-peak-btn');
       if(isPeakMode) {
         btn.innerText = '⚡ 피크 ON';
