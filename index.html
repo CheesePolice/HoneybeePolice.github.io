@@ -310,13 +310,27 @@
     function applyMudeo(mudeoType) {
       if(!selectedStory) return alert("스토리를 선택하세요.");
       
-      // 같은 버튼을 다시 클릭하면 해제
+      // 같은 버튼을 다시 클릭하면 기본값으로 복원
       if(selectedMudeo === mudeoType) {
-        document.querySelectorAll('.calc-check').forEach(c => c.checked = false);
+        // 기본값으로 복원
+        const defaultValues = {
+          'ATM': { money: 100000000, time: 10 },
+          '편의점': { money: 100000000, time: 15 },
+          '빈집 털이': { money: 100000000, time: 15 },
+          '보석상': { money: 150000000, time: 20 }
+        };
+        
+        const storyCheckbox = Array.from(document.querySelectorAll('#tab-story .calc-check')).find(c => 
+          c.parentElement.innerText.includes(selectedStory)
+        );
+        
+        if(storyCheckbox && defaultValues[selectedStory]) {
+          storyCheckbox.dataset.money = defaultValues[selectedStory].money;
+          storyCheckbox.dataset.time = defaultValues[selectedStory].time;
+        }
+        
         document.querySelectorAll('.mudeo-btn').forEach(btn => btn.classList.remove('mudeo-active'));
-        selectedStory = null;
         selectedMudeo = null;
-        document.getElementById('mudeo-panel').style.display = 'none';
         document.getElementById('f-bail-time').value = 0;
         isManualBailInput = false;
         calc();
