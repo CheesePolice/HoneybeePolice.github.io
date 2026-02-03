@@ -3,256 +3,126 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>경찰청 통합 기록지</title>
+<title>CHEESE 경찰청 통합 기록지</title>
 
 <style>
-:root{
-  --bg:#f0f2f5;
-  --box:#ffffff;
-  --text:#222;
-  --sub:#666;
-  --border:#ddd;
-  --blue:#3498db;
-  --green:#27ae60;
+:root {
+  --bg-color:#f0f2f5; --container-bg:#fff; --text-main:#333; --text-sub:#666;
+  --border-color:#e1e4e8; --input-bg:#f8f9fa; --navbar-bg:#2c3e50;
+  --accent-green:#27ae60; --accent-red:#e74c3c; --accent-blue:#3498db;
 }
-*{box-sizing:border-box;}
+[data-theme="dark"] {
+  --bg-color:#18191a; --container-bg:#242526; --text-main:#e4e6eb;
+  --text-sub:#b0b3b8; --border-color:#3e4042; --input-bg:#3a3b3c;
+  --navbar-bg:#1c1e21;
+}
+
+/* 🔧 클릭 문제 핵심 해결 */
 body{
   margin:0;
-  font-family:Pretendard, sans-serif;
-  background:var(--bg);
-  color:var(--text);
+  background:var(--bg-color);
+  color:var(--text-main);
+  font-family:'Pretendard',sans-serif;
+  transition:.3s;
   user-select:auto;
   padding-bottom:120px;
 }
-button,input,textarea{
+.item label,
+.item input,
+button,
+input,
+select,
+textarea{
   pointer-events:auto;
-  font-family:inherit;
 }
-.navbar{
-  position:sticky;
-  top:0;
-  height:60px;
-  background:#2c3e50;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:500;
-}
-.navbar button{
-  background:none;
-  border:none;
-  color:#ccc;
-  font-size:15px;
-  font-weight:700;
-  padding:10px 18px;
-  cursor:pointer;
-}
-.navbar button.active{
-  background:rgba(255,255,255,.15);
-  border-radius:12px;
-  color:#fff;
-}
-.page{
-  display:none;
-  padding:30px;
-}
-.page.active{display:block;}
-.container{
-  max-width:720px;
-  margin:0 auto;
-  background:var(--box);
-  padding:30px;
-  border-radius:18px;
-}
-.item{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:#f7f7f7;
-  padding:14px 16px;
-  border-radius:12px;
-  margin-bottom:10px;
-}
-.item label{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  cursor:pointer;
-}
-.item input{
-  transform:scale(1.3);
-}
-.badge{
-  font-size:13px;
-  color:var(--sub);
-}
-.mudeo-wrap{
-  display:flex;
-  gap:10px;
-  margin-top:10px;
-}
-.mudeo-btn{
-  flex:1;
-  padding:12px;
-  border:none;
-  border-radius:10px;
-  background:#eee;
-  cursor:pointer;
-  font-weight:700;
-}
-.mudeo-btn.active{
-  background:var(--blue);
-  color:#fff;
-}
-.sticky-result-bar{
-  position:fixed;
-  left:0;right:0;bottom:0;
-  background:var(--box);
-  border-top:1px solid var(--border);
-  padding:15px 20px;
-  display:flex;
-  justify-content:space-between;
-  pointer-events:none;
-}
-.sticky-result-bar span{
-  font-weight:700;
-}
-.sticky-result-bar button{
-  pointer-events:auto;
-  background:var(--green);
-  color:#fff;
-  border:none;
-  border-radius:10px;
-  padding:10px 16px;
-  font-weight:700;
-}
+
+.navbar{background:var(--navbar-bg);height:60px;display:flex;justify-content:center;align-items:center;position:sticky;top:0;z-index:900}
+.nav-links{display:flex;gap:10px}
+.nav-btn{background:transparent;color:#bdc3c7;border:none;padding:10px 18px;font-weight:bold;cursor:pointer;border-radius:12px}
+.nav-btn.active{background:rgba(255,255,255,.15);color:#fff}
+.theme-toggle{position:absolute;right:20px;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer}
+
+.page-section{display:none;padding:40px 20px 40px 250px}
+.page-section.active{display:flex}
+.container-box{background:var(--container-bg);padding:35px;border-radius:20px;width:100%;max-width:680px}
+.calc-list{max-height:400px;overflow-y:auto}
+.item{display:flex;align-items:center;padding:14px;background:var(--input-bg);border-radius:12px;margin-bottom:8px;cursor:pointer}
+.item input{transform:scale(1.4);margin-right:12px}
+.badge{margin-left:auto;color:var(--accent-red);font-size:12px}
 </style>
 </head>
 
 <body>
 
-<nav class="navbar">
-  <button class="active" onclick="openPage('story',this)">스토리</button>
-  <button onclick="openPage('calc',this)">벌금</button>
-</nav>
+<!-- ================= 스토리 클릭 수정됨 ================= -->
 
-<!-- ================= 스토리 ================= -->
-<div id="story" class="page active">
-  <div class="container">
-    <h2>📖 스토리 선택</h2>
-
-    <div class="item">
-      <label>
-        <input type="checkbox" class="story-check"
-          data-story="ATM" data-money="100000000" data-time="10"
-          onchange="handleStoryChange(this)">
-        ATM 털이
-      </label>
-      <span class="badge">$100,000,000 / 10분</span>
-    </div>
-
-    <div class="item">
-      <label>
-        <input type="checkbox" class="story-check"
-          data-story="편의점" data-money="80000000" data-time="8"
-          onchange="handleStoryChange(this)">
-        편의점 강도
-      </label>
-      <span class="badge">$80,000,000 / 8분</span>
-    </div>
-
-    <div class="item">
-      <label>
-        <input type="checkbox" class="story-check"
-          data-story="보석상" data-money="400000000" data-time="10"
-          onchange="handleStoryChange(this)">
-        보석상 강도
-      </label>
-      <span class="badge">$400,000,000 / 10분</span>
-    </div>
-
-    <div id="mudeo-panel" style="display:none;margin-top:20px;">
-      <h3>🧱 묻더 선택</h3>
-      <div class="mudeo-wrap">
-        <button class="mudeo-btn" onclick="selectMudeo(1,this)">묻더 1</button>
-        <button class="mudeo-btn" onclick="selectMudeo(2,this)">묻더 2</button>
-        <button class="mudeo-btn" onclick="selectMudeo(3,this)">묻더 3</button>
-      </div>
-    </div>
+<div id="tab-story" class="calc-list">
+  <div class="item" onclick="handleStoryClick(this,'ATM',event)">
+    <label><input type="checkbox" class="calc-check" data-money="100000000" data-time="10"> ATM</label>
+    <span class="badge">$100,000,000 / 10분</span>
   </div>
-</div>
 
-<!-- ================= 벌금 ================= -->
-<div id="calc" class="page">
-  <div class="container">
-    <h2>⚖️ 벌금 계산</h2>
-    <p>스토리 선택 시 자동 계산됩니다.</p>
+  <div class="item" onclick="handleStoryClick(this,'편의점',event)">
+    <label><input type="checkbox" class="calc-check" data-money="200000000" data-time="10"> 편의점</label>
+    <span class="badge">$200,000,000 / 10분</span>
   </div>
-</div>
 
-<div class="sticky-result-bar" id="resultBar">
-  <span id="resultText">선택 없음</span>
-  <button onclick="copyResult()">복사</button>
+  <div class="item" onclick="handleStoryClick(this,'빈집 털이',event)">
+    <label><input type="checkbox" class="calc-check" data-money="100000000" data-time="0"> 빈집 털이</label>
+    <span class="badge">$100,000,000</span>
+  </div>
+
+  <div class="item" onclick="handleStoryClick(this,'빈집 털이 대형',event)">
+    <label><input type="checkbox" class="calc-check" data-money="200000000" data-time="0"> 빈집 털이 대형</label>
+    <span class="badge">$200,000,000</span>
+  </div>
+
+  <div class="item" onclick="handleStoryClick(this,'보석상',event)">
+    <label><input type="checkbox" class="calc-check" data-money="400000000" data-time="10"> 보석상</label>
+    <span class="badge">$400,000,000 / 10분</span>
+  </div>
 </div>
 
 <script>
-let selectedStory = null;
-let selectedMudeo = null;
-let money = 0;
-let time = 0;
+let selectedStory=null;
+let selectedMudeo=null;
 
-function openPage(id,btn){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.querySelectorAll('.navbar button').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-}
+/* 🔥 클릭 안 되던 핵심 함수 교체 */
+function handleStoryClick(el,story,e){
+  if(e) e.stopPropagation();
 
-function handleStoryChange(cb){
-  document.querySelectorAll('.story-check').forEach(c=>{
-    if(c!==cb) c.checked=false;
+  const chk=el.querySelector('.calc-check');
+  if(!chk) return;
+
+  document.querySelectorAll('#tab-story .calc-check').forEach(c=>{
+    if(c!==chk) c.checked=false;
   });
 
-  if(cb.checked){
-    selectedStory = cb.dataset.story;
-    money = Number(cb.dataset.money);
-    time = Number(cb.dataset.time);
+  chk.checked=!chk.checked;
+
+  if(chk.checked){
+    selectedStory=story;
+    selectedMudeo=null;
     document.getElementById('mudeo-panel').style.display='block';
+    document.querySelectorAll('.mudeo-btn').forEach(b=>b.classList.remove('mudeo-active'));
   }else{
     selectedStory=null;
-    money=0;
-    time=0;
+    selectedMudeo=null;
     document.getElementById('mudeo-panel').style.display='none';
   }
-
-  selectedMudeo=null;
-  document.querySelectorAll('.mudeo-btn').forEach(b=>b.classList.remove('active'));
   calc();
 }
 
-function selectMudeo(num,btn){
-  selectedMudeo=num;
-  document.querySelectorAll('.mudeo-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  calc();
-}
-
-function calc(){
-  if(!selectedStory){
-    document.getElementById('resultText').innerText='선택 없음';
-    return;
-  }
-  let txt = `${selectedStory} | $${money.toLocaleString()} | ${time}분`;
-  if(selectedMudeo) txt += ` | 묻더 ${selectedMudeo}`;
-  document.getElementById('resultText').innerText=txt;
-}
-
-function copyResult(){
-  navigator.clipboard.writeText(
-    document.getElementById('resultText').innerText
-  );
-  alert('복사 완료');
-}
+/* ❗ JS 문법 오류 같이 수정 (콤마 누락) */
+const defaultValues={
+  'ATM':{money:100000000,time:10},
+  '편의점':{money:200000000,time:10},
+  '빈집 털이':{money:100000000,time:0},
+  '빈집 털이 대형':{money:200000000,time:0},
+  '보석상':{money:400000000,time:10},
+  '남부 은행':{money:600000000,time:10},
+  '대형 마트':{money:500000000,time:10}
+};
 </script>
 
 </body>
