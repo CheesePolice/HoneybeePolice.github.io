@@ -485,7 +485,7 @@
         time = Math.max(0, baseTime - bail);
       }
 
-      if (baseTime >= 5) time = Math.max(5, time); else time = Math.max(0, time);
+      if (baseTime >= 0) time = Math.max(0, time); else time = Math.max(0, time);
       
       // ATM이고 피크모드일 때는 0분 허용
       if(isPeakMode && Array.from(document.querySelectorAll('#tab-story .calc-check:checked')).some(c => c.parentElement.innerText.includes('ATM'))) {
